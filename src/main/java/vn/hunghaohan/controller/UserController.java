@@ -4,7 +4,9 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
-import vn.hunghaohan.controller.request.UserCreationRequest;
+import vn.hunghaohan.controller.request.user.UserCreationRequest;
+import vn.hunghaohan.controller.request.user.UserPasswordRequest;
+import vn.hunghaohan.controller.request.user.UserUpdateRequest;
 import vn.hunghaohan.controller.response.UserResponse;
 
 import java.util.*;
@@ -71,11 +73,33 @@ public class UserController {
 
     @Operation(summary = "Create new user", description = "Tạo mới một user")
     @PostMapping("/create")
-    public Map<String, Object> createUser(UserCreationRequest request) {
+    public Map<String, Object> createUser(@RequestBody UserCreationRequest request) {
         Map<String, Object> result = new LinkedHashMap<>();
         result.put("status", HttpStatus.CREATED.value());
         result.put("message", "create user successfully");
         result.put("data", 3);
+
+        return result;
+    }
+
+    @Operation(summary = "Update user", description = "Cập nhật thông tin của user")
+    @PutMapping("/update")
+    public Map<String, Object> updateUser(@RequestBody UserUpdateRequest request) {
+        Map<String, Object> result = new LinkedHashMap<>();
+        result.put("status", HttpStatus.ACCEPTED.value());
+        result.put("message", "update user successfully");
+        result.put("data", "");
+
+        return result;
+    }
+
+    @Operation(summary = "Change Password", description = "Thay đổi mật khẩu của user")
+    @PatchMapping("/change-password")
+    public Map<String, Object> changePassword(@RequestBody UserPasswordRequest request) {
+        Map<String, Object> result = new LinkedHashMap<>();
+        result.put("status", HttpStatus.NO_CONTENT.value());
+        result.put("message", "change password successfully");
+        result.put("data", "");
 
         return result;
     }

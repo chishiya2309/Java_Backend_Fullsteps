@@ -1,4 +1,4 @@
-package vn.hunghaohan.controller.request;
+package vn.hunghaohan.controller.request.user;
 
 import lombok.Getter;
 
@@ -6,7 +6,8 @@ import java.io.Serializable;
 import java.util.Date;
 
 @Getter
-public class UserCreationRequest implements Serializable {
+public class UserUpdateRequest implements Serializable {
+    private Long id;
     private String firstName;
     private String lastName;
     private Date birthDay;
