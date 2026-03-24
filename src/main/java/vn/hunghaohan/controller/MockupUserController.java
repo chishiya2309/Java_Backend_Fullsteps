@@ -10,12 +10,15 @@ import vn.hunghaohan.controller.request.user.UserPasswordRequest;
 import vn.hunghaohan.controller.request.user.UserUpdateRequest;
 import vn.hunghaohan.controller.response.UserResponse;
 
-import java.util.*;
+import java.util.Date;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
 
 @RestController
-@RequestMapping("/user")
+@RequestMapping("/mockup/user")
 @Tag(name = "User Controller")
-public class UserController {
+public class MockupUserController {
 
     @Operation(summary = "Test API", description = "Mô tả chi tiết")
     @GetMapping("/list")
@@ -80,7 +83,7 @@ public class UserController {
         result.put("message", "create user successfully");
         result.put("data", 3);
 
-        return new ResponseEntity<>(1L, HttpStatus.CREATED);
+        return result;
     }
 
     @Operation(summary = "Update user", description = "Cập nhật thông tin của user")

@@ -1,9 +1,11 @@
 package vn.hunghaohan.controller.request.user;
 
 import lombok.Getter;
+import vn.hunghaohan.controller.request.AddressRequest;
 
 import java.io.Serializable;
 import java.util.Date;
+import java.util.List;
 
 @Getter
 public class UserCreationRequest implements Serializable {
@@ -14,4 +16,5 @@ public class UserCreationRequest implements Serializable {
     private String phone;
     private String email;
     private String username;
+    private List<AddressRequest> addresses; //home, office
 }
