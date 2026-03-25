@@ -4,9 +4,15 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.annotations.UpdateTimestamp;
+import org.hibernate.type.SqlTypes;
+import vn.hunghaohan.common.UserStatus;
+import vn.hunghaohan.common.UserType;
 
 import java.time.Instant;
 import java.time.LocalDate;
+import java.util.Date;
 
 @Getter
 @Setter
@@ -14,19 +20,23 @@ import java.time.LocalDate;
 @Table(name = "tbl_user")
 public class UserEntity {
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "id")
     private Long id;
 
     @Column(name = "first_name", length = 255)
     private String firstName;
 
-    @Column(name = "first_name", length = 255)
+    @Column(name = "last_name", length = 255)
+    private String lastName;
+
+    @Column(name = "gender", length = 255)
     private String gender;
 
     @Column(name = "date_of_birth")
-    private LocalDate birthDay;
+    private Date birthDay;
 
-    @Column(name = "user_name", unique = true, nullable = false, length = 255)
+    @Column(name = "username", unique = true, nullable = false, length = 255)
     private String userName;
 
     @Column(name = "password", length = 255)
@@ -38,9 +48,13 @@ public class UserEntity {
     @Column(name = "phone", length = 15)
     private String phone;
 
+    @Enumerated(EnumType.STRING)
+    @JdbcTypeCode(SqlTypes.NAMED_ENUM)
     @Column(name = "type", length = 255)
     private UserType type;
 
+    @Enumerated(EnumType.STRING)
+    @JdbcTypeCode(SqlTypes.NAMED_ENUM)
     @Column(name = "status", length = 255)
     private UserStatus status;
 
@@ -49,5 +63,6 @@ public class UserEntity {
     private Instant createdAt;
 
     @Column(name = "updated_at", length = 255)
+    @UpdateTimestamp
     private Instant updatedAt;
 }

@@ -2,20 +2,25 @@ package vn.hunghaohan.controller;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import vn.hunghaohan.controller.request.user.UserCreationRequest;
-import vn.hunghaohan.controller.request.user.UserPasswordRequest;
-import vn.hunghaohan.controller.request.user.UserUpdateRequest;
+import vn.hunghaohan.controller.request.UserCreationRequest;
+import vn.hunghaohan.controller.request.UserPasswordRequest;
+import vn.hunghaohan.controller.request.UserUpdateRequest;
 import vn.hunghaohan.controller.response.UserResponse;
+import vn.hunghaohan.service.UserService;
 
 import java.util.*;
 
 @RestController
 @RequestMapping("/user")
 @Tag(name = "User Controller")
+@RequiredArgsConstructor
 public class UserController {
+
+    private final UserService userService;
 
     @Operation(summary = "Test API", description = "Mô tả chi tiết")
     @GetMapping("/list")
@@ -75,10 +80,11 @@ public class UserController {
     @Operation(summary = "Create new user", description = "Tạo mới một user")
     @PostMapping("/create")
     public ResponseEntity<Long> createUser(@RequestBody UserCreationRequest request) {
+
         Map<String, Object> result = new LinkedHashMap<>();
         result.put("status", HttpStatus.CREATED.value());
         result.put("message", "create user successfully");
-        result.put("data", 3);
+        result.put("data", userService.save(request));
 
         return new ResponseEntity<>(1L, HttpStatus.CREATED);
     }

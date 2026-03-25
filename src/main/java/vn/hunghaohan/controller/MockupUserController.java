@@ -5,9 +5,9 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import vn.hunghaohan.controller.request.user.UserCreationRequest;
-import vn.hunghaohan.controller.request.user.UserPasswordRequest;
-import vn.hunghaohan.controller.request.user.UserUpdateRequest;
+import vn.hunghaohan.controller.request.UserCreationRequest;
+import vn.hunghaohan.controller.request.UserPasswordRequest;
+import vn.hunghaohan.controller.request.UserUpdateRequest;
 import vn.hunghaohan.controller.response.UserResponse;
 
 import java.util.Date;
@@ -83,7 +83,7 @@ public class MockupUserController {
         result.put("message", "create user successfully");
         result.put("data", 3);
 
-        return result;
+        return ResponseEntity.status(HttpStatus.CREATED).body(3L);
     }
 
     @Operation(summary = "Update user", description = "Cập nhật thông tin của user")
