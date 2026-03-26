@@ -3,6 +3,7 @@ package vn.hunghaohan.controller;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -18,6 +19,7 @@ import java.util.*;
 @RequestMapping("/user")
 @Tag(name = "User Controller")
 @RequiredArgsConstructor
+@Slf4j(topic = "USER-CONTROLLER")
 public class UserController {
 
     private final UserService userService;
@@ -79,14 +81,14 @@ public class UserController {
 
     @Operation(summary = "Create new user", description = "Tạo mới một user")
     @PostMapping("/create")
-    public ResponseEntity<Long> createUser(@RequestBody UserCreationRequest request) {
+    public ResponseEntity<Object> createUser(@RequestBody UserCreationRequest request) {
 
         Map<String, Object> result = new LinkedHashMap<>();
         result.put("status", HttpStatus.CREATED.value());
         result.put("message", "create user successfully");
         result.put("data", userService.save(request));
 
-        return new ResponseEntity<>(1L, HttpStatus.CREATED);
+        return new ResponseEntity<>(result, HttpStatus.CREATED);
     }
 
     @Operation(summary = "Update user", description = "Cập nhật thông tin của user")

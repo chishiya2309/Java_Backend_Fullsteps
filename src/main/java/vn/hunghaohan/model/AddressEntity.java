@@ -42,6 +42,9 @@ public class AddressEntity {
     @Column(name = "address_type")
     private Integer addressType;
 
+    @Column(name = "user_id")
+    private Long userId;
+
     @Column(name = "created_at", length = 255)
     @CreationTimestamp
     private Instant createdAt;

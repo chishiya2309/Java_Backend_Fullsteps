@@ -73,6 +73,7 @@ public class UserServiceImpl implements UserService {
                 addressEntity.setCity(address.getCity());
                 addressEntity.setCountry(address.getCountry());
                 addressEntity.setAddressType(address.getAddressType());
+                addressEntity.setUserId(user.getId());
                 addreses.add(addressEntity);
             });
             addressRepository.saveAll(addreses);
