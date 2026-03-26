@@ -2,6 +2,7 @@ package vn.hunghaohan.service.impl;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import vn.hunghaohan.common.UserStatus;
@@ -10,6 +11,7 @@ import vn.hunghaohan.controller.request.UserCreationRequest;
 import vn.hunghaohan.controller.request.UserPasswordRequest;
 import vn.hunghaohan.controller.request.UserUpdateRequest;
 import vn.hunghaohan.controller.response.UserResponse;
+import vn.hunghaohan.exception.ResourceNotFoundException;
 import vn.hunghaohan.model.AddressEntity;
 import vn.hunghaohan.model.UserEntity;
 import vn.hunghaohan.repository.AddressRepository;
@@ -26,6 +28,7 @@ public class UserServiceImpl implements UserService {
 
     private final UserRepository userRepository;
     private final AddressRepository addressRepository;
+    private final PasswordEncoder passwordEncoder;
 
     @Override
     public List<UserResponse> findAll() {
@@ -84,17 +87,74 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public int update(UserUpdateRequest req) {
-        return 0;
+    @Transactional(rollbackFor = Exception.class)
+    public void update(UserUpdateRequest req) {
+        log.info("Updating user: {}", req);
+
+        // Get user by id
+        UserEntity user = getUserEntity(req.getId());
+
+        // set data
+        user.setFirstName(req.getFirstName());
+        user.setLastName(req.getLastName());
+        user.setGender(req.getGender());
+        user.setBirthDay(req.getBirthDay());
+        user.setEmail(req.getEmail());
+        user.setPhone(req.getPhone());
+        user.setUserName(req.getUsername());
+
+        userRepository.save(user);
+        log.info("Updated user: {}", user);
+
+        // save address
+
+        List<AddressEntity> addresses = new ArrayList<>();
+
+        req.getAddresses().forEach(address -> {
+            AddressEntity addressEntity = addressRepository.findByUserIdAndAddressType(req.getId(), address.getAddressType());
+            if (addressEntity == null) {
+                addressEntity = new AddressEntity();
+            }
+
+            addressEntity.setApartmentNumber(address.getApartmentNumber());
+            addressEntity.setFloor(address.getFloor());
+            addressEntity.setBuilding(address.getBuilding());
+            addressEntity.setStreetNumber(address.getStreetNumber());
+            addressEntity.setStreet(address.getStreet());
+            addressEntity.setCity(address.getCity());
+            addressEntity.setCountry(address.getCountry());
+            addressEntity.setAddressType(address.getAddressType());
+            addressEntity.setUserId(user.getId());
+
+            addresses.add(addressEntity);
+        });
+
+        // Save addresses
+        addressRepository.saveAll(addresses);
+        log.info("Updated addresses: {}", addresses);
     }
 
     @Override
     public void changePassword(UserPasswordRequest req) {
+        log.info("Changing password for user: {}", req);
 
+        // Get user by id
+        UserEntity user = getUserEntity(req.getId());
+
+        if (req.getPassword().equals(req.getConfirmPassword())) {
+            user.setPassword(passwordEncoder.encode(req.getPassword()));
+        }
+
+        userRepository.save(user);
+        log.info("Changed password for user: {}", user);
     }
 
     @Override
     public void delete(Long id) {
 
+    }
+
+    private UserEntity getUserEntity(Long id) {
+        return userRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("User not found"));
     }
 }

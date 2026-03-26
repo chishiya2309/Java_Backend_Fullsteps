@@ -6,4 +6,5 @@ import vn.hunghaohan.model.AddressEntity;
 
 @Repository
 public interface AddressRepository extends JpaRepository<AddressEntity, Long> {
+    AddressEntity findByUserIdAndAddressType(Long userId, Integer addressType);
 }

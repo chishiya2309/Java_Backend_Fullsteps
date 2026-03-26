@@ -82,7 +82,7 @@ public class UserController {
     @Operation(summary = "Create new user", description = "Tạo mới một user")
     @PostMapping("/create")
     public ResponseEntity<Object> createUser(@RequestBody UserCreationRequest request) {
-
+        log.info("Request to create user: {}", request);
         Map<String, Object> result = new LinkedHashMap<>();
         result.put("status", HttpStatus.CREATED.value());
         result.put("message", "create user successfully");
@@ -94,6 +94,10 @@ public class UserController {
     @Operation(summary = "Update user", description = "Cập nhật thông tin của user")
     @PutMapping("/update")
     public Map<String, Object> updateUser(@RequestBody UserUpdateRequest request) {
+        log.info("Request to update user: {}", request);
+
+        userService.update(request);
+
         Map<String, Object> result = new LinkedHashMap<>();
         result.put("status", HttpStatus.ACCEPTED.value());
         result.put("message", "update user successfully");
@@ -105,6 +109,10 @@ public class UserController {
     @Operation(summary = "Change Password", description = "Thay đổi mật khẩu của user")
     @PatchMapping("/change-password")
     public Map<String, Object> changePassword(@RequestBody UserPasswordRequest request) {
+        log.info("Request to change password: {}", request);
+
+        userService.changePassword(request);
+
         Map<String, Object> result = new LinkedHashMap<>();
         result.put("status", HttpStatus.NO_CONTENT.value());
         result.put("message", "change password successfully");
