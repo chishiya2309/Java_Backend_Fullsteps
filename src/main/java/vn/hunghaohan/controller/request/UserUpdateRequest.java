@@ -1,4 +1,4 @@
-package vn.hunghaohan.controller.request.user;
+package vn.hunghaohan.controller.request;
 
 import lombok.Getter;
 

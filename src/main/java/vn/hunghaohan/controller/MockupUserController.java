@@ -2,8 +2,6 @@ package vn.hunghaohan.controller;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -11,18 +9,16 @@ import vn.hunghaohan.controller.request.UserCreationRequest;
 import vn.hunghaohan.controller.request.UserPasswordRequest;
 import vn.hunghaohan.controller.request.UserUpdateRequest;
 import vn.hunghaohan.controller.response.UserResponse;
-import vn.hunghaohan.service.UserService;
 
-import java.util.*;
+import java.util.Date;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
 
 @RestController
-@RequestMapping("/user")
+@RequestMapping("/mockup/user")
 @Tag(name = "User Controller")
-@RequiredArgsConstructor
-@Slf4j(topic = "USER-CONTROLLER")
-public class UserController {
-
-    private final UserService userService;
+public class MockupUserController {
 
     @Operation(summary = "Test API", description = "Mô tả chi tiết")
     @GetMapping("/list")
@@ -81,14 +77,13 @@ public class UserController {
 
     @Operation(summary = "Create new user", description = "Tạo mới một user")
     @PostMapping("/create")
-    public ResponseEntity<Object> createUser(@RequestBody UserCreationRequest request) {
-
+    public ResponseEntity<Long> createUser(@RequestBody UserCreationRequest request) {
         Map<String, Object> result = new LinkedHashMap<>();
         result.put("status", HttpStatus.CREATED.value());
         result.put("message", "create user successfully");
-        result.put("data", userService.save(request));
+        result.put("data", 3);
 
-        return new ResponseEntity<>(result, HttpStatus.CREATED);
+        return ResponseEntity.status(HttpStatus.CREATED).body(3L);
     }
 
     @Operation(summary = "Update user", description = "Cập nhật thông tin của user")
