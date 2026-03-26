@@ -37,7 +37,18 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public UserResponse findById(Long id) {
-        return null;
+        log.info("Finding user with id: {}", id);
+        UserEntity userEntity = getUserEntity(id);
+        return UserResponse.builder()
+                .id(id)
+                .firstName(userEntity.getFirstName())
+                .lastName(userEntity.getLastName())
+                .gender(String.valueOf(userEntity.getGender()))
+                .birthDay(userEntity.getBirthDay())
+                .username(userEntity.getUserName())
+                .email(userEntity.getEmail())
+                .phone(userEntity.getPhone())
+                .build();
     }
 
     @Override
