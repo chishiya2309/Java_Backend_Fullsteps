@@ -17,7 +17,7 @@ public interface UserService {
 
     Long save(UserCreationRequest req);
 
-    int update(UserUpdateRequest req);
+    void update(UserUpdateRequest req);
 
     void changePassword(UserPasswordRequest req);
 
