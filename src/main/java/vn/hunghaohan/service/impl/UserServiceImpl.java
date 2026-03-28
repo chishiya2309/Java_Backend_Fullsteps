@@ -1,15 +1,23 @@
 package vn.hunghaohan.service.impl;
 
+import ch.qos.logback.core.util.StringUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.jspecify.annotations.NonNull;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.StringUtils;
 import vn.hunghaohan.common.UserStatus;
 import vn.hunghaohan.common.UserType;
 import vn.hunghaohan.controller.request.UserCreationRequest;
 import vn.hunghaohan.controller.request.UserPasswordRequest;
 import vn.hunghaohan.controller.request.UserUpdateRequest;
+import vn.hunghaohan.controller.response.UserPageResponse;
 import vn.hunghaohan.controller.response.UserResponse;
 import vn.hunghaohan.exception.ResourceNotFoundException;
 import vn.hunghaohan.model.AddressEntity;
@@ -20,6 +28,8 @@ import vn.hunghaohan.service.UserService;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 @Service
 @Slf4j(topic = "USER-SERVICE")
@@ -31,8 +41,44 @@ public class UserServiceImpl implements UserService {
     private final PasswordEncoder passwordEncoder;
 
     @Override
-    public List<UserResponse> findAll() {
-        return List.of();
+    public UserPageResponse findAll(String keyword, String sort, int page, int size) {
+        log.info("Finding all users with keyword: {}, sort: {}, pageNo: {}, pageSize: {}", keyword, sort, page, size);
+
+        // Sorting
+        Sort.Order order = new Sort.Order(Sort.Direction.ASC, "id");
+        if(StringUtils.hasLength(sort)) {
+            // Gọi search method
+            Pattern pattern = Pattern.compile("(\\w+?)(:)(.*)"); // tên cột:asc|desc
+            Matcher matcher = pattern.matcher(sort);
+            if (matcher.find()) {
+                String columnName = matcher.group(1);
+                if(matcher.group(3).equalsIgnoreCase("asc")) {
+                    order = new Sort.Order(Sort.Direction.ASC, columnName);
+                }else {
+                    order = new Sort.Order(Sort.Direction.DESC, columnName);
+                }
+            }
+        }
+
+        // Xử lý trường hợp FE muốn bắt đầu với page = 1
+        int pageNo = 0;
+        if (page > 0) {
+            pageNo = page - 1;
+        }
+
+        // Paging
+        Pageable pageable = PageRequest.of(pageNo, size, Sort.by(order));
+
+        Page<UserEntity> entityPage;
+
+        if(StringUtils.hasLength(keyword)) {
+            // Gọi search method
+            entityPage = userRepository.searchByKeyword("%" + keyword.toLowerCase() + "%", pageable);
+        }else {
+            entityPage = userRepository.findAll(pageable);
+        }
+
+        return getUserPageResponse(size, entityPage, pageNo);
     }
 
     @Override
@@ -179,5 +225,33 @@ public class UserServiceImpl implements UserService {
      */
     private UserEntity getUserEntity(Long id) {
         return userRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("User not found"));
+    }
+
+    /**
+     * Convert  UserEntities to UserResponse
+     * @param size
+     * @param userPage
+     * @param pageNo
+     * @return
+     */
+    private static @NonNull UserPageResponse getUserPageResponse(int size, Page<UserEntity> userPage, int pageNo) {
+        List<UserResponse> userList = userPage.stream().map(entity -> UserResponse.builder()
+                .id(entity.getId())
+                .firstName(entity.getFirstName())
+                .lastName(entity.getLastName())
+                .gender(String.valueOf(entity.getGender()))
+                .birthDay(entity.getBirthDay())
+                .username(entity.getUserName())
+                .email(entity.getEmail())
+                .phone(entity.getPhone())
+                .build()
+        ).toList();
+
+        UserPageResponse response = new UserPageResponse();
+        response.setPageNumber(pageNo);
+        response.setPageSize(size);
+        response.setTotalPages(userPage.getTotalPages());
+        response.setUsers(userList);
+        return response;
     }
 }
