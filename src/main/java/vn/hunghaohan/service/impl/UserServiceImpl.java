@@ -19,6 +19,7 @@ import vn.hunghaohan.controller.request.UserPasswordRequest;
 import vn.hunghaohan.controller.request.UserUpdateRequest;
 import vn.hunghaohan.controller.response.UserPageResponse;
 import vn.hunghaohan.controller.response.UserResponse;
+import vn.hunghaohan.exception.InvalidDataException;
 import vn.hunghaohan.exception.ResourceNotFoundException;
 import vn.hunghaohan.model.AddressEntity;
 import vn.hunghaohan.model.UserEntity;
@@ -106,6 +107,12 @@ public class UserServiceImpl implements UserService {
     @Transactional(rollbackFor = Exception.class)
     public Long save(UserCreationRequest req) {
         log.info("Saving user: {}", req);
+
+        UserEntity userByEmail = userRepository.findByEmail(req.getEmail());
+        if (userByEmail != null) {
+            throw new InvalidDataException("Email already exists");
+        }
+
         UserEntity user = new UserEntity();
         user.setFirstName(req.getFirstName());
         user.setLastName(req.getLastName());

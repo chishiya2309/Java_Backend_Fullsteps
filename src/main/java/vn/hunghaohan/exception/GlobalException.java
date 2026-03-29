@@ -14,8 +14,7 @@ import org.springframework.web.context.request.WebRequest;
 
 import java.util.Date;
 
-    import static org.springframework.http.HttpStatus.BAD_REQUEST;
-    import static org.springframework.http.HttpStatus.NOT_FOUND;
+    import static org.springframework.http.HttpStatus.*;
     import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 
 @RestControllerAdvice
@@ -93,6 +92,36 @@ public class GlobalException {
         errorResponse.setPath(request.getDescription(false).replace("uri=", ""));
         errorResponse.setStatus(NOT_FOUND.value());
         errorResponse.setError(NOT_FOUND.getReasonPhrase());
+        errorResponse.setMessage(e.getMessage());
+
+        return errorResponse;
+    }
+
+    @ExceptionHandler(InvalidDataException.class)
+    @ResponseStatus(CONFLICT)
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "409", description = "Conflict",
+                content = {@Content(mediaType = APPLICATION_JSON_VALUE,
+                    examples = @ExampleObject(
+                            name = "409 Response",
+                            summary = "Handle exception when input data is conflicted",
+                            value = """
+                                    {
+                                        "timestamp": "2023-10-19T06:07:35.321+00:00",
+                                        "status": 409,
+                                        "path": "/api/v1/...",
+                                        "error": "Conflict",
+                                        "message": "{data} exists. Please try again"
+                                    }
+                                    """
+                    ))})
+    })
+    public ErrorResponse handleDuplicateKeyException(InvalidDataException e, WebRequest request) {
+        ErrorResponse errorResponse = new ErrorResponse();
+        errorResponse.setTimestamp(new Date());
+        errorResponse.setPath(request.getDescription(false).replace("uri=", ""));
+        errorResponse.setStatus(CONFLICT.value());
+        errorResponse.setError(CONFLICT.getReasonPhrase());
         errorResponse.setMessage(e.getMessage());
 
         return errorResponse;
