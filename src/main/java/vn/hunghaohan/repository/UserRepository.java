@@ -7,8 +7,6 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 import vn.hunghaohan.model.UserEntity;
 
-import java.util.List;
-
 @Repository
 public interface UserRepository extends JpaRepository<UserEntity, Long> {
     @Query(value = "select u from UserEntity u where u.status='ACTIVE' AND " +
@@ -18,4 +16,6 @@ public interface UserRepository extends JpaRepository<UserEntity, Long> {
             "or lower(u.email) like :keyword " +
             "or u.userName like :keyword")
     Page<UserEntity> searchByKeyword(String keyword, Pageable pageable);
+
+    UserEntity findByEmail(String email);
 }
