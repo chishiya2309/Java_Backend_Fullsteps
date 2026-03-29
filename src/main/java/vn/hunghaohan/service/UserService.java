@@ -3,13 +3,14 @@ package vn.hunghaohan.service;
 import vn.hunghaohan.controller.request.UserCreationRequest;
 import vn.hunghaohan.controller.request.UserPasswordRequest;
 import vn.hunghaohan.controller.request.UserUpdateRequest;
+import vn.hunghaohan.controller.response.UserPageResponse;
 import vn.hunghaohan.controller.response.UserResponse;
 
 import java.util.List;
 
 public interface UserService {
 
-    List<UserResponse> findAll();
+    UserPageResponse findAll(String keyword, String sort, int page, int size);
 
     UserResponse findById(Long id);
 
