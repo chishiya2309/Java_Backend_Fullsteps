@@ -14,7 +14,9 @@ spring:
     show-sql: true
     hibernate:
       ddl-auto: none
-
+  brevo:
+    api-key: ${BREVO_API_KEY}
+    from-email: lequanghung.work@gmail.com
 springdoc:
   api-docs:
     enabled: true
