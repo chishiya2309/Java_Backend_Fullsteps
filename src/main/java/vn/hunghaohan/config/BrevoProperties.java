@@ -13,5 +13,7 @@ public class BrevoProperties {
     private String apiKey;
     private String fromEmail;
     private String fromName;
+    private Long templateIdEmailVerification;
+    private String verificationLink;
 }
 

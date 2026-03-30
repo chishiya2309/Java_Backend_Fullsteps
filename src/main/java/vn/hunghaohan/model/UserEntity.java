@@ -51,6 +51,9 @@ public class UserEntity {
     @Column(name = "phone", length = 15)
     private String phone;
 
+    @Column(name = "secret_code", length = 255)
+    private String secretCode;
+
     @Enumerated(EnumType.STRING)
     @JdbcTypeCode(SqlTypes.NAMED_ENUM)
     @Column(name = "type", length = 255)

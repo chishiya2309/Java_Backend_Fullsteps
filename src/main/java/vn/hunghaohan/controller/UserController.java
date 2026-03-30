@@ -2,6 +2,7 @@ package vn.hunghaohan.controller;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Min;
 import lombok.RequiredArgsConstructor;
@@ -17,6 +18,7 @@ import vn.hunghaohan.controller.response.UserPageResponse;
 import vn.hunghaohan.controller.response.UserResponse;
 import vn.hunghaohan.service.UserService;
 
+import java.io.IOException;
 import java.util.*;
 
 @RestController
@@ -69,6 +71,18 @@ public class UserController {
         result.put("data", userService.save(request));
 
         return new ResponseEntity<>(result, HttpStatus.CREATED);
+    }
+
+    @GetMapping("/confirm-email")
+    public void confirmEmail(@RequestParam String secretCode, HttpServletResponse response) throws IOException {
+        log.info("Confirming email with secret code: {}", secretCode);
+        try {
+            userService.confirmEmail(secretCode);
+            response.sendRedirect("https://google.com");
+        }catch(Exception e) {
+            log.error("Email confirmation failed {}", e.getMessage());
+            throw new RuntimeException("Invalid or expired email confirmation code");
+        }
     }
 
     @Operation(summary = "Update user", description = "Cập nhật thông tin của user")
