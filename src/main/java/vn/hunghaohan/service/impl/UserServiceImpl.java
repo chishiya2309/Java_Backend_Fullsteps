@@ -95,7 +95,7 @@ public class UserServiceImpl implements UserService {
                 .lastName(userEntity.getLastName())
                 .gender(String.valueOf(userEntity.getGender()))
                 .birthDay(userEntity.getBirthDay())
-                .username(userEntity.getUserName())
+                .username(userEntity.getUsername())
                 .email(userEntity.getEmail())
                 .phone(userEntity.getPhone())
                 .build();
@@ -271,7 +271,7 @@ public class UserServiceImpl implements UserService {
                 .lastName(entity.getLastName())
                 .gender(String.valueOf(entity.getGender()))
                 .birthDay(entity.getBirthDay())
-                .username(entity.getUserName())
+                .username(entity.getUsername())
                 .email(entity.getEmail())
                 .phone(entity.getPhone())
                 .build()
