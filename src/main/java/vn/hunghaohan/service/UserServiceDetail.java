@@ -7,6 +7,6 @@ import vn.hunghaohan.repository.UserRepository;
 public record UserServiceDetail(UserRepository userRepository) {
 
     public UserDetailsService userServiceDetail() {
-        return userRepository::findByUsername;
+        return userRepository::findByUserName;
     }
 }

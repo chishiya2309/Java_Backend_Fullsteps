@@ -4,7 +4,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Repository;
 import vn.hunghaohan.model.UserEntity;
 
@@ -22,5 +21,5 @@ public interface UserRepository extends JpaRepository<UserEntity, Long> {
 
     UserEntity findBySecretCode(String secretCode);
 
-    UserDetails findByUsername(String username);
+    UserEntity findByUserName(String userName);
 }

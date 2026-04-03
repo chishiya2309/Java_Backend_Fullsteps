@@ -22,6 +22,7 @@ import java.util.List;
 
 @Getter
 @Setter
+
 @Entity
 @Table(name = "tbl_user")
 public class UserEntity implements UserDetails, Serializable {
@@ -84,22 +85,27 @@ public class UserEntity implements UserDetails, Serializable {
 
     @Override
     public @NonNull String getUsername() {
-        return "";
+        return userName;
+    }
+
+    @Override
+    public @NonNull String getPassword() {
+        return password;
     }
 
     @Override
     public boolean isAccountNonExpired() {
-        return UserDetails.super.isAccountNonExpired();
+        return true;
     }
 
     @Override
     public boolean isAccountNonLocked() {
-        return UserDetails.super.isAccountNonLocked();
+        return true;
     }
 
     @Override
     public boolean isCredentialsNonExpired() {
-        return UserDetails.super.isCredentialsNonExpired();
+        return true;
     }
 
     @Override

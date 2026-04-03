@@ -10,6 +10,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import vn.hunghaohan.controller.request.SignInRequest;
 import vn.hunghaohan.controller.response.TokenResponse;
+import vn.hunghaohan.service.AuthenticationService;
+
+import java.nio.file.AccessDeniedException;
 
 @RestController
 @RequestMapping("/auth")
@@ -18,14 +21,14 @@ import vn.hunghaohan.controller.response.TokenResponse;
 @RequiredArgsConstructor
 public class AuthenticationController {
 
+    private final AuthenticationService authenticationService;
+
     @Operation(summary = "Access token", description = "Get access token and refresh token by email and password")
     @PostMapping("/access-token")
-    public TokenResponse getAccessToken(@RequestBody SignInRequest req) {
+    public TokenResponse getAccessToken(@RequestBody SignInRequest req) throws AccessDeniedException {
         log.info("Access token request");
-        return TokenResponse.builder()
-                .accessToken("DUMMY-ACCESS-TOKEN")
-                .refreshToken("DUMMY-REFRESH-TOKEN")
-                .build();
+
+        return authenticationService.getAccessToken(req);
     }
 
     @Operation(summary = "Refresh token", description = "Get new access token by refresh token")
