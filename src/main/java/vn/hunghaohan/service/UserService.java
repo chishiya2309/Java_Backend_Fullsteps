@@ -18,6 +18,8 @@ public interface UserService {
 
     Long save(UserCreationRequest req);
 
+    void confirmEmail(String secretCode);
+
     void update(UserUpdateRequest req);
 
     void changePassword(UserPasswordRequest req);

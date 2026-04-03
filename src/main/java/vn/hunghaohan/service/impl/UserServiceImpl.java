@@ -25,10 +25,12 @@ import vn.hunghaohan.model.AddressEntity;
 import vn.hunghaohan.model.UserEntity;
 import vn.hunghaohan.repository.AddressRepository;
 import vn.hunghaohan.repository.UserRepository;
+import vn.hunghaohan.service.EmailService;
 import vn.hunghaohan.service.UserService;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -40,6 +42,7 @@ public class UserServiceImpl implements UserService {
     private final UserRepository userRepository;
     private final AddressRepository addressRepository;
     private final PasswordEncoder passwordEncoder;
+    private final EmailService emailService;
 
     @Override
     public UserPageResponse findAll(String keyword, String sort, int page, int size) {
@@ -92,7 +95,7 @@ public class UserServiceImpl implements UserService {
                 .lastName(userEntity.getLastName())
                 .gender(String.valueOf(userEntity.getGender()))
                 .birthDay(userEntity.getBirthDay())
-                .username(userEntity.getUserName())
+                .username(userEntity.getUsername())
                 .email(userEntity.getEmail())
                 .phone(userEntity.getPhone())
                 .build();
@@ -124,6 +127,8 @@ public class UserServiceImpl implements UserService {
         user.setPassword(req.getPassword());
         user.setType(req.getType());
         user.setStatus(UserStatus.NONE);
+        String secretCode = UUID.randomUUID().toString();
+        user.setSecretCode(secretCode);
         userRepository.save(user);
         log.info("Saved user: {}", user);
 ;
@@ -147,7 +152,25 @@ public class UserServiceImpl implements UserService {
             log.info("Saved addresses: {}", addreses);
         }
 
-        return 1L;
+        // send email confirm
+        emailService.emailVerification(req.getEmail(), req.getFirstName(), secretCode);
+
+        return user.getId();
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public void confirmEmail(String secretCode) {
+        log.info("Confirming email by secretCode");
+        UserEntity user = userRepository.findBySecretCode(secretCode);
+        if (user == null) {
+            throw new InvalidDataException("Invalid or expired email confirmation code");
+        }
+
+        user.setStatus(UserStatus.ACTIVE);
+        user.setSecretCode(null);
+        userRepository.save(user);
+        log.info("Activated user id={}", user.getId());
     }
 
     @Override
@@ -248,7 +271,7 @@ public class UserServiceImpl implements UserService {
                 .lastName(entity.getLastName())
                 .gender(String.valueOf(entity.getGender()))
                 .birthDay(entity.getBirthDay())
-                .username(entity.getUserName())
+                .username(entity.getUsername())
                 .email(entity.getEmail())
                 .phone(entity.getPhone())
                 .build()
