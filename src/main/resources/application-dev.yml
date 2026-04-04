@@ -32,7 +32,7 @@ openapi:
     server: http://localhost:${server.port}
 
 jwt:
-  expiryMinutes: 5
+  expiryMinutes: 1
   expiryDays: 14
   accessKey: ${JWT_ACCESS_KEY}
   refreshKey: ${JWT_REFRESH_KEY}
