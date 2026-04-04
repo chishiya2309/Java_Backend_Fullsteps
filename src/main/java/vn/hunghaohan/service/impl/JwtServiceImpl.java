@@ -94,7 +94,8 @@ public class JwtServiceImpl implements JwtService {
         return Jwts.builder()
                 .claims(claims)
                 .subject(username)
-                .issuedAt(new Date(System.currentTimeMillis() + 1000 * 60 * expiryMinutes))
+                .issuedAt(new Date(System.currentTimeMillis()))
+                .expiration(new Date(System.currentTimeMillis() + 1000 * 60 * expiryMinutes))
                 .signWith(getSigningKey(ACCESS_TOKEN))
                 .compact();
     }
@@ -104,7 +105,8 @@ public class JwtServiceImpl implements JwtService {
         return Jwts.builder()
                 .claims(claims)
                 .subject(username)
-                .issuedAt(new Date(System.currentTimeMillis() + 1000 * 60 * 60 * 24 * expiryDays))
+                .issuedAt(new Date(System.currentTimeMillis()))
+                .expiration(new Date(System.currentTimeMillis() + 1000 * 60 * 60 * 24 * expiryDays))
                 .signWith(getSigningKey(REFRESH_TOKEN))
                 .compact();
     }

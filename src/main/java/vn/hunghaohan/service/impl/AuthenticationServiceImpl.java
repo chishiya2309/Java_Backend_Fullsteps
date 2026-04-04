@@ -8,8 +8,10 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
+import vn.hunghaohan.common.TokenType;
 import vn.hunghaohan.controller.request.SignInRequest;
 import vn.hunghaohan.controller.response.TokenResponse;
+import vn.hunghaohan.exception.ResourceNotFoundException;
 import vn.hunghaohan.repository.UserRepository;
 import vn.hunghaohan.service.AuthenticationService;
 import vn.hunghaohan.service.JwtService;
@@ -49,7 +51,29 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     }
 
     @Override
-    public TokenResponse getRefreshToken(String req) {
-        return null;
+    public TokenResponse getRefreshToken(String req) throws AccessDeniedException {
+        log.info("Refresh access token");
+
+        try {
+            // Extract username from refresh token
+            String username = jwtService.extractUsername(req, TokenType.REFRESH_TOKEN);
+
+            // Get user information
+            var user = userRepository.findByUserName(username);
+            if (user == null) {
+                throw new ResourceNotFoundException("User not found");
+            }
+
+            // Generate new access token
+            String newAccessToken = jwtService.generateAccessToken(user.getId(), username, user.getAuthorities());
+
+            return TokenResponse.builder()
+                    .accessToken(newAccessToken)
+                    .refreshToken(req)
+                    .build();
+        } catch (AccessDeniedException e) {
+            log.error("Refresh token fail, message= {}", e.getMessage());
+            throw e;
+        }
     }
 }
