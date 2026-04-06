@@ -9,6 +9,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import vn.hunghaohan.controller.request.UserCreationRequest;
@@ -33,6 +34,7 @@ public class UserController {
 
     @Operation(summary = "Get user list", description = "Lấy danh sách user với các tham số tùy chọn: keyword, sort, page, size")
     @GetMapping("/list")
+    @PreAuthorize("hasAnyAuthority('MANAGER', 'ADMIN')")
     public Map<String, Object> getList(@RequestParam(required = false) String keyword,
                                     @RequestParam(required = false) String sort,
                                     @RequestParam(defaultValue = "0") int page,
@@ -47,6 +49,7 @@ public class UserController {
         return result;
     }
 
+    @PreAuthorize("hasAuthority('USER')")
     @Operation(summary = "Get user detail", description = "Lấy thông tin chi tiết của user theo id")
     @GetMapping("/{userId}")
     public Map<String, Object> getUserDetail(@PathVariable @Min(value = 1, message = "userId must be equals or greater than 1") Long userId) {
@@ -117,6 +120,7 @@ public class UserController {
 
     @Operation(summary = "Delete user", description = "Xóa user theo id")
     @DeleteMapping("/delete/{userId}")
+    @PreAuthorize("hasAuthority('ADMIN')")
     public Map<String, Object> deleteUser(@PathVariable @Min(value = 1, message = "userId must be greater than 0") Long userId) {
         log.info("Deleting user: {}", userId);
 

@@ -10,11 +10,13 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.jspecify.annotations.NonNull;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.stereotype.Component;
+import org.springframework.util.StringUtils;
 import org.springframework.web.filter.OncePerRequestFilter;
 import vn.hunghaohan.common.TokenType;
 import vn.hunghaohan.exception.ErrorResponse;
@@ -28,6 +30,7 @@ import java.util.Date;
 @Component
 @Slf4j(topic = "CUSTOMIZE-REQUEST-FILTER")
 @RequiredArgsConstructor
+@EnableMethodSecurity(prePostEnabled = true)
 public class CustomizeRequestFilter extends OncePerRequestFilter {
 
     private final JwtService jwtService;
@@ -37,21 +40,27 @@ public class CustomizeRequestFilter extends OncePerRequestFilter {
     protected void doFilterInternal(@NonNull HttpServletRequest request, @NonNull HttpServletResponse response, @NonNull FilterChain filterChain) throws ServletException, IOException {
         log.info("{} {}", request.getMethod(), request.getRequestURI());
 
-        String authHeader = request.getHeader("Authorization");
-        if(authHeader != null && authHeader.startsWith("Bearer ")) {
-            authHeader = authHeader.substring(7);
-            log.info("Bearer authHeader: {}", authHeader.substring(0, Math.min(20, authHeader.length())));
+        final String authHeader = request.getHeader("Authorization");
+        if(StringUtils.hasLength(authHeader) && authHeader.startsWith("Bearer ")) {
+            String token = authHeader.substring(7).trim();
+            if (!StringUtils.hasText(token)) {
+                filterChain.doFilter(request, response);
+                return;
+            }
 
-            String username;
+            int tokenPreviewLength = Math.min(token.length(), 20);
+            log.info("token: {}", token.substring(0, tokenPreviewLength));
+
+            String username = "";
             try {
-                username = jwtService.extractUsername(authHeader, TokenType.ACCESS_TOKEN);
+                username = jwtService.extractUsername(token, TokenType.ACCESS_TOKEN);
                 log.info("username: {}", username);
             } catch (AccessDeniedException e) {
-                log.error("Access Denied, message = {}",e.getMessage());
-                response.setStatus(HttpServletResponse.SC_OK);
+                log.info(e.getMessage());
+                response.setStatus(HttpServletResponse.SC_FORBIDDEN);
                 response.setContentType("application/json");
                 response.setCharacterEncoding("UTF-8");
-                response.getWriter().write(errorResponse(e.getMessage()));
+                response.getWriter().write(errorResponse(request.getRequestURI(), e.getMessage()));
                 return;
             }
 
@@ -69,11 +78,12 @@ public class CustomizeRequestFilter extends OncePerRequestFilter {
         filterChain.doFilter(request, response);
     }
 
-    private String errorResponse(String message) {
+    private String errorResponse(String url, String message) {
         try {
             ErrorResponse error = new ErrorResponse();
             error.setTimestamp(new Date());
             error.setError("Forbidden");
+            error.setPath(url);
             error.setStatus(HttpServletResponse.SC_FORBIDDEN);
             error.setMessage(message);
 
