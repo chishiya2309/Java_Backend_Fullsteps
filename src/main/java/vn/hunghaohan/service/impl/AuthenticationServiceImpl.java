@@ -3,20 +3,22 @@ package vn.hunghaohan.service.impl;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.security.authentication.DisabledException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import vn.hunghaohan.common.TokenType;
 import vn.hunghaohan.controller.request.SignInRequest;
 import vn.hunghaohan.controller.response.TokenResponse;
-import vn.hunghaohan.exception.ResourceNotFoundException;
 import vn.hunghaohan.repository.UserRepository;
 import vn.hunghaohan.service.AuthenticationService;
 import vn.hunghaohan.service.JwtService;
 
 import java.nio.file.AccessDeniedException;
+import java.util.ArrayList;
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -31,18 +33,22 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     public TokenResponse getAccessToken(SignInRequest req) throws AccessDeniedException {
         log.info("Get access token");
 
+        List<String> authorities = new ArrayList<>();
         try {
-            Authentication authentication = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(req.getUsername(), req.getPassword()));
-            SecurityContextHolder.getContext().setAuthentication(authentication);
-        }catch(AuthenticationException e) {
+            Authentication authenticate = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(req.getUsername(), req.getPassword()));
+
+            log.info("isAuthenticated = {}", authenticate.isAuthenticated());
+            log.info("Authorities: {}", authenticate.getAuthorities());
+            authenticate.getAuthorities().forEach(authority -> authorities.add(authority.getAuthority()));
+
+            SecurityContextHolder.getContext().setAuthentication(authenticate);
+        }catch(BadCredentialsException | DisabledException e) {
             log.error("Login fail, message= {}", e.getMessage());
             throw new AccessDeniedException(e.getMessage());
         }
 
-        var user = userRepository.findByUserName(req.getUsername());
-
-        String accessToken = jwtService.generateAccessToken(user.getId(), req.getUsername(), user.getAuthorities());
-        String refreshToken = jwtService.generateRefreshToken(user.getId(), req.getUsername(), user.getAuthorities());
+        String accessToken = jwtService.generateAccessToken(req.getUsername(), authorities);
+        String refreshToken = jwtService.generateRefreshToken(req.getUsername(), authorities);
 
         return TokenResponse.builder()
                 .accessToken(accessToken)
@@ -60,12 +66,11 @@ public class AuthenticationServiceImpl implements AuthenticationService {
 
             // Get user information
             var user = userRepository.findByUserName(username);
-            if (user == null) {
-                throw new ResourceNotFoundException("User not found");
-            }
+            List<String> authorities = new ArrayList<>();
+            user.getAuthorities().forEach(auth -> authorities.add(auth.getAuthority()));
 
             // Generate new access token
-            String newAccessToken = jwtService.generateAccessToken(user.getId(), username, user.getAuthorities());
+            String newAccessToken = jwtService.generateAccessToken(username, authorities);
 
             return TokenResponse.builder()
                     .accessToken(newAccessToken)

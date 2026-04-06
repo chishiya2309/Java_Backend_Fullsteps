@@ -3,33 +3,26 @@ package vn.hunghaohan.model;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
-import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.JdbcTypeCode;
-import org.hibernate.annotations.UpdateTimestamp;
 import org.hibernate.type.SqlTypes;
 import org.jspecify.annotations.NonNull;
 import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import vn.hunghaohan.common.Gender;
 import vn.hunghaohan.common.UserStatus;
 import vn.hunghaohan.common.UserType;
 
 import java.io.Serializable;
-import java.time.Instant;
-import java.util.Collection;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
+import java.util.Locale;
 
 @Getter
 @Setter
 
 @Entity
 @Table(name = "tbl_user")
-public class UserEntity implements UserDetails, Serializable {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "id")
-    private Long id;
+public class UserEntity extends AbstractEntity<Long> implements UserDetails, Serializable  {
 
     @Column(name = "first_name", length = 255)
     private String firstName;
@@ -70,17 +63,24 @@ public class UserEntity implements UserDetails, Serializable {
     @Column(name = "status", length = 255)
     private UserStatus status;
 
-    @Column(name = "created_at", length = 255)
-    @CreationTimestamp
-    private Instant createdAt;
-
-    @Column(name = "updated_at", length = 255)
-    @UpdateTimestamp
-    private Instant updatedAt;
+    @OneToMany(mappedBy = "userId", fetch = FetchType.EAGER, cascade = CascadeType.ALL)
+    private Set<UserHasRole> roles = new HashSet<>();
 
     @Override
     public @NonNull Collection<? extends GrantedAuthority> getAuthorities() {
-        return List.of();
+        //1. Get Role
+        List<Role> roleList = roles.stream().map(UserHasRole::getRoleId).toList();
+
+        // 2. Normalize role names to avoid case/whitespace mismatches in @PreAuthorize checks
+        List<String> roleNames = roleList.stream()
+                .map(Role::getName)
+                .filter(Objects::nonNull)
+                .map(String::trim)
+                .map(roleName -> roleName.toUpperCase(Locale.ROOT))
+                .toList();
+
+        //3. Add role name to authority
+        return roleNames.stream().map(SimpleGrantedAuthority::new).toList();
     }
 
     @Override
