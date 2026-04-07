@@ -129,10 +129,10 @@ public class UserServiceImpl implements UserService {
         user.setStatus(UserStatus.NONE);
         String secretCode = UUID.randomUUID().toString();
         user.setSecretCode(secretCode);
-        userRepository.save(user);
+        UserEntity result = userRepository.save(user);
         log.info("Saved user: {}", user);
 ;
-        if(user.getId() != null) {
+        if(result.getId() != null) {
             log.info("user id: {}", user.getId());
             List<AddressEntity> addreses = new ArrayList<>();
             req.getAddresses().forEach(address -> {
@@ -145,7 +145,7 @@ public class UserServiceImpl implements UserService {
                 addressEntity.setCity(address.getCity());
                 addressEntity.setCountry(address.getCountry());
                 addressEntity.setAddressType(address.getAddressType());
-                addressEntity.setUserId(user.getId());
+                addressEntity.setUserId(result.getId());
                 addreses.add(addressEntity);
             });
             addressRepository.saveAll(addreses);
@@ -155,7 +155,7 @@ public class UserServiceImpl implements UserService {
         // send email confirm
         emailService.emailVerification(req.getEmail(), req.getFirstName(), secretCode);
 
-        return user.getId();
+        return result.getId();
     }
 
     @Override
@@ -281,6 +281,7 @@ public class UserServiceImpl implements UserService {
         response.setPageNumber(pageNo);
         response.setPageSize(size);
         response.setTotalPages(userPage.getTotalPages());
+        response.setTotalElements(userPage.getTotalElements());
         response.setUsers(userList);
         return response;
     }
