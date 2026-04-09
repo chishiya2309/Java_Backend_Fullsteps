@@ -1,6 +1,5 @@
 package vn.hunghaohan.service;
 
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -11,13 +10,15 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.test.context.junit.jupiter.SpringExtension;
 import vn.hunghaohan.common.Gender;
 import vn.hunghaohan.common.UserStatus;
 import vn.hunghaohan.common.UserType;
 import vn.hunghaohan.controller.request.AddressRequest;
 import vn.hunghaohan.controller.request.UserCreationRequest;
+import vn.hunghaohan.controller.request.UserPasswordRequest;
+import vn.hunghaohan.controller.request.UserUpdateRequest;
 import vn.hunghaohan.controller.response.UserPageResponse;
+import vn.hunghaohan.controller.response.UserResponse;
 import vn.hunghaohan.exception.ResourceNotFoundException;
 import vn.hunghaohan.model.UserEntity;
 import vn.hunghaohan.repository.AddressRepository;
@@ -27,13 +28,12 @@ import vn.hunghaohan.service.impl.UserServiceImpl;
 import java.sql.Date;
 import java.time.LocalDate;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 class UserServiceTest {
@@ -83,10 +83,6 @@ class UserServiceTest {
     void setUp() {
         // Khởi tạo bước triển khai la user Service
         userService = new UserServiceImpl(userRepository, addressRepository, passwordEncoder, emailService);
-    }
-
-    @AfterEach
-    void tearDown() {
     }
 
     @Test
@@ -141,10 +137,6 @@ class UserServiceTest {
     }
 
     @Test
-    void findByUsername() {
-    }
-
-    @Test
     void testSaveUser_Success() {
         // Giả lập phương thức
         when(userRepository.save(any(UserEntity.class))).thenReturn(hungHaoHan);
@@ -176,18 +168,85 @@ class UserServiceTest {
     }
 
     @Test
-    void confirmEmail() {
+    void testUpdateUser_success() {
+        Long userId = 2L;
+        UserEntity updatedUser = new UserEntity();
+
+        updatedUser.setId(userId);
+        updatedUser.setFirstName("Jane");
+        updatedUser.setLastName("97");
+        updatedUser.setGender(Gender.FEMALE);
+        updatedUser.setBirthDay(Date.valueOf(LocalDate.of(2005, 9, 23)));
+        updatedUser.setUserName("j97so2");
+        updatedUser.setPassword("12345678");
+        updatedUser.setEmail("hathaynhungbocon1");
+        updatedUser.setPhone("0123456789");
+        updatedUser.setType(UserType.USER);
+        updatedUser.setStatus(UserStatus.ACTIVE);
+
+        when(userRepository.findById(userId)).thenReturn(Optional.of(jack97));
+        when(userRepository.save(any(UserEntity.class))).thenReturn(updatedUser);
+
+
+        UserUpdateRequest updateRequest = new UserUpdateRequest();
+        updateRequest.setId(userId);
+        updateRequest.setFirstName("Jane");
+        updateRequest.setLastName("97");
+        updateRequest.setGender(Gender.FEMALE);
+        updateRequest.setBirthDay(Date.valueOf(LocalDate.of(2005, 9, 23)));
+        updateRequest.setUsername("j97so2");
+        updateRequest.setEmail("hathaynhungbocon1");
+        updateRequest.setPhone("0123456789");
+
+        AddressRequest addressRequest = new AddressRequest();
+        addressRequest.setApartmentNumber("411");
+        addressRequest.setFloor("4");
+        addressRequest.setBuilding("Bekind");
+        addressRequest.setStreetNumber("17");
+        addressRequest.setStreet("Đường số 7");
+        addressRequest.setCity("Hồ Chí Minh");
+        addressRequest.setCountry("Việt Nam");
+        addressRequest.setAddressType(1);
+        updateRequest.setAddresses(List.of(addressRequest));
+
+        userService.update(updateRequest);
+
+        UserResponse result = userService.findById(userId);
+        assertNotNull(result);
+        assertEquals("Jane", result.getFirstName());
+        assertEquals("97", result.getLastName());
     }
 
     @Test
-    void update() {
+    void testChangePassword_Success() {
+        Long userId = 1L;
+
+        // Giả lập phương thức
+        when(userRepository.findById(userId)).thenReturn(Optional.of(hungHaoHan));
+        when(passwordEncoder.encode("Youngboycodon")).thenReturn("encodedPassword");
+        when(userRepository.save(any(UserEntity.class))).thenReturn(hungHaoHan);
+
+
+        UserPasswordRequest request = new UserPasswordRequest();
+        request.setId(userId);
+        request.setPassword("Youngboycodon");
+        request.setConfirmPassword("Youngboycodon");
+
+        userService.changePassword(request);
+
+        assertEquals("encodedPassword", hungHaoHan.getPassword());
+        verify(userRepository, times(1)).save(hungHaoHan);
     }
 
     @Test
-    void changePassword() {
-    }
+    void testDeleteUser_Success() {
+        Long userId = 1L;
+        when(userRepository.findById(userId)).thenReturn(Optional.of(hungHaoHan));
+        userService.delete(userId);
+        UserEntity userEntity = userRepository.findById(userId).orElseThrow(() -> new ResourceNotFoundException("User not found"));
 
-    @Test
-    void delete() {
+        assertNotNull(userEntity);
+        assertEquals(UserStatus.INACTIVE, userEntity.getStatus());
+        verify(userRepository, times(1)).save(hungHaoHan);
     }
 }

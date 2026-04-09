@@ -56,7 +56,7 @@ public class BrevoEmailService implements EmailService {
             log.info("Email sent successfully. messageId={}", response.getMessageId());
         } catch (ApiException exception) {
             log.error("Failed to send email via Brevo. status={}, body={}", exception.getCode(), exception.getResponseBody(), exception);
-            throw new RuntimeException("Failed to send email via Brevo", exception);
+            throw new IllegalArgumentException("Failed to send email via Brevo", exception);
         }
     }
 
@@ -83,7 +83,7 @@ public class BrevoEmailService implements EmailService {
         String verificationToken = String.format("?secretCode=%s", secretCode);
 
         java.util.Map<String, Object> params = new java.util.HashMap<>();
-        params.put("verify_link", Objects.requireNonNull(brevoProperties.getVerificationLink()) + verificationToken); // Khớp với {{ params.verify_link }}
+        params.put("verify_link", Objects.requireNonNull(brevoProperties.getVerificationLink()) + verificationToken);
         params.put("firstName", name);
 
         SendSmtpEmail sendSmtpEmail = new SendSmtpEmail()
@@ -97,7 +97,7 @@ public class BrevoEmailService implements EmailService {
         } catch (ApiException exception) {
             log.error("Failed to send verification email via Brevo. status={}, body={}",
                     exception.getCode(), exception.getResponseBody(), exception);
-            throw new RuntimeException("Failed to send verification email via Brevo", exception);
+            throw new IllegalArgumentException("Failed to send verification email via Brevo", exception);
         }
     }
 }

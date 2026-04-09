@@ -1,9 +1,7 @@
 package vn.hunghaohan.controller.response;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
+import vn.hunghaohan.common.Gender;
 
 import java.io.Serializable;
 import java.util.Date;
@@ -12,12 +10,13 @@ import java.util.Date;
 @Setter
 @Builder
 @AllArgsConstructor
+@RequiredArgsConstructor
 public class UserResponse implements Serializable {
     private Long id;
     private String firstName;
     private String lastName;
     private Date birthDay;
-    private String gender;
+    private Gender gender;
     private String phone;
     private String email;
     private String username;

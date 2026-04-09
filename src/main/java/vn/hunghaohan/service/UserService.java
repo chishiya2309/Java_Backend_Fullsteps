@@ -6,8 +6,6 @@ import vn.hunghaohan.controller.request.UserUpdateRequest;
 import vn.hunghaohan.controller.response.UserPageResponse;
 import vn.hunghaohan.controller.response.UserResponse;
 
-import java.util.List;
-
 public interface UserService {
 
     UserPageResponse findAll(String keyword, String sort, int page, int size);

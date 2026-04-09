@@ -93,7 +93,7 @@ public class UserServiceImpl implements UserService {
                 .id(id)
                 .firstName(userEntity.getFirstName())
                 .lastName(userEntity.getLastName())
-                .gender(String.valueOf(userEntity.getGender()))
+                .gender(userEntity.getGender())
                 .birthDay(userEntity.getBirthDay())
                 .username(userEntity.getUsername())
                 .email(userEntity.getEmail())
@@ -124,14 +124,13 @@ public class UserServiceImpl implements UserService {
         user.setEmail(req.getEmail());
         user.setPhone(req.getPhone());
         user.setUserName(req.getUsername());
-        user.setPassword(req.getPassword());
+        user.setPassword(passwordEncoder.encode(req.getPassword()));
         user.setType(req.getType());
         user.setStatus(UserStatus.NONE);
         String secretCode = UUID.randomUUID().toString();
         user.setSecretCode(secretCode);
         UserEntity result = userRepository.save(user);
         log.info("Saved user: {}", user);
-;
         if(result.getId() != null) {
             log.info("user id: {}", user.getId());
             List<AddressEntity> addreses = new ArrayList<>();
@@ -269,7 +268,7 @@ public class UserServiceImpl implements UserService {
                 .id(entity.getId())
                 .firstName(entity.getFirstName())
                 .lastName(entity.getLastName())
-                .gender(String.valueOf(entity.getGender()))
+                .gender(entity.getGender())
                 .birthDay(entity.getBirthDay())
                 .username(entity.getUsername())
                 .email(entity.getEmail())

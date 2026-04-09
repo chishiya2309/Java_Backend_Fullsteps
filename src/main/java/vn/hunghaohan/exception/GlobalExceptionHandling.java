@@ -10,7 +10,6 @@ package vn.hunghaohan.exception;
     import org.springframework.web.bind.MethodArgumentNotValidException;
     import org.springframework.web.bind.MissingServletRequestParameterException;
     import org.springframework.web.bind.annotation.ExceptionHandler;
-import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
     import org.springframework.web.client.HttpServerErrorException;
     import org.springframework.web.context.request.WebRequest;
@@ -21,7 +20,7 @@ import java.util.Date;
     import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 
 @RestControllerAdvice
-public class GlobalException {
+public class GlobalExceptionHandling {
 
     @ExceptionHandler({ConstraintViolationException.class,
         MissingServletRequestParameterException.class, MethodArgumentNotValidException.class})

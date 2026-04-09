@@ -3,8 +3,6 @@ package vn.hunghaohan.model;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
-import org.hibernate.annotations.JdbcTypeCode;
-import org.hibernate.type.SqlTypes;
 import org.jspecify.annotations.NonNull;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -31,7 +29,6 @@ public class UserEntity extends AbstractEntity<Long> implements UserDetails, Ser
     private String lastName;
 
     @Enumerated(EnumType.STRING)
-    @JdbcTypeCode(SqlTypes.NAMED_ENUM)
     @Column(name = "gender")
     private Gender gender;
 
@@ -54,12 +51,10 @@ public class UserEntity extends AbstractEntity<Long> implements UserDetails, Ser
     private String secretCode;
 
     @Enumerated(EnumType.STRING)
-    @JdbcTypeCode(SqlTypes.NAMED_ENUM)
     @Column(name = "type", length = 255)
     private UserType type;
 
     @Enumerated(EnumType.STRING)
-    @JdbcTypeCode(SqlTypes.NAMED_ENUM)
     @Column(name = "status", length = 255)
     private UserStatus status;
 
